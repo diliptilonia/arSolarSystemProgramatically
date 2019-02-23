@@ -16,19 +16,60 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        // Set the view's delegate
         sceneView.delegate = self
-        
-        // Show statistics such as fps and timing information
-        sceneView.showsStatistics = true
-        
-        // Create a new scene
-        let scene = SCNScene(named: "art.scnassets/ship.scn")!
-        
-        // Set the scene to the view
+        let scene = SCNScene()
         sceneView.scene = scene
+        
+        createSolarSystem()
     }
+    
+    func createSolarSystem() {
+        // ParentNode
+        let parentNode = SCNNode()
+            parentNode.position.z = 0.5
+        
+        // Planets
+        let mercury = Planet(name: "mercury", radius: 0.14, rotation: 32.degreesToRadians, color: .orange, sunDistance: 1.3)
+        let venus = Planet(name: "venus", radius: 0.35, rotation: 10.degreesToRadians, color: .cyan, sunDistance: 2)
+        let earth = Planet(name: "earth", radius: 0.5, rotation: 18.degreesToRadians, color: .blue, sunDistance: 7)
+        let saturn = Planet(name: "saturn ", radius: 1, rotation: 12.degreesToRadians, color: .brown, sunDistance: 12)
+        
+        let planets = [mercury, venus, earth, saturn]
+        
+        for planet in planets {
+            parentNode.addChildNode(createPanetsNode(from : planet))
+        }
+        
+        // Light
+        let light = SCNLight()
+        light.type = .omni
+        parentNode.light = light
+        
+        // Stars
+    }
+    
+    
+    func createPanetsNode(from planet : Planet) -> SCNNode {
+        
+        let parentNode = SCNNode()
+        let rotationAction = SCNAction.rotateBy(x: 0, y: planet.rotation, z: 0, duration: 1)
+        parentNode.runAction(rotationAction)
+        
+        let geomatric = SCNSphere(radius: planet.radius)
+        geomatric.firstMaterial?.diffuse.contents = planet.color
+        
+        let planetNode = SCNNode(geometry: geomatric)
+        planetNode.position.z = -planet.sunDistance
+        planetNode.name = planet.name
+        parentNode.addChildNode(planetNode)
+        
+        return parentNode
+        
+    }
+    
+    
+    
+    
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -47,29 +88,13 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         sceneView.session.pause()
     }
 
-    // MARK: - ARSCNViewDelegate
-    
-/*
-    // Override to create and configure nodes for anchors added to the view's session.
-    func renderer(_ renderer: SCNSceneRenderer, nodeFor anchor: ARAnchor) -> SCNNode? {
-        let node = SCNNode()
-     
-        return node
-    }
-*/
-    
-    func session(_ session: ARSession, didFailWithError error: Error) {
-        // Present an error message to the user
-        
-    }
-    
-    func sessionWasInterrupted(_ session: ARSession) {
-        // Inform the user that the session has been interrupted, for example, by presenting an overlay
-        
-    }
-    
-    func sessionInterruptionEnded(_ session: ARSession) {
-        // Reset tracking and/or remove existing anchors if consistent tracking is required
-        
+
+
+}
+
+
+extension Int {
+    var degreesToRadians : CGFloat {
+        return CGFloat(self) * .pi / 180
     }
 }
